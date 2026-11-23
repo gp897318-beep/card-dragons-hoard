@@ -2,6 +2,7 @@
 // Copies game/ and screenshots/ from beside this file into the output
 // directory, then writes dossier.json with buildDossier from the kit's
 // vendored library. Node 22, standard library only, no build step.
+// Deterministic: the same repo always writes the same dossier bytes.
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
