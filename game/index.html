@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DRAGON'S HOARD — a hoard-stealing card duel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --ember:#ff5a2a; --ember-deep:#c22e0e; --gold:#f5c542; --gold-deep:#b8860b;
+    --red:#d92b2b; --blue:#2f7fe0; --green:#2fae5f; --purple:#9b4de0;
+    --ink:#1a0e06; --parch:#f7e8c8; --panel:#2a1408; --panel2:#3a1e0c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; user-select:none;}
+  html,body{width:100%; height:100%; overflow:hidden; background:#120801;}
+  body{font-family:Georgia,'Times New Roman',serif; color:var(--parch);}
+  #app{width:1280px; height:800px; margin:0 auto; position:relative;
+    background:radial-gradient(ellipse 90% 70% at 50% 30%, #4a1c05 0%, #2a0f02 55%, #120801 100%);
+    overflow:hidden;}
+  /* ---------- top bar ---------- */
+  #topbar{position:absolute; top:0; left:0; right:0; height:64px; display:flex;
+    align-items:center; gap:14px; padding:0 16px;
+    background:linear-gradient(180deg,#00000088,#00000000); z-index:5;}
+  #title{font-size:30px; font-weight:bold; letter-spacing:2px; color:var(--gold);
+    text-shadow:0 0 14px #ff8c2a, 0 2px 0 #000;}
+  #objective{font-size:13px; color:#ffd9a0; font-style:italic; max-width:300px; line-height:1.25;}
+  .lifeblock{display:flex; flex-direction:column; align-items:center; gap:1px;}
+  .lifeblock .who{font-size:11px; letter-spacing:2px; color:#ffb27a;}
+  .lifeblock .life{font-size:24px; font-weight:bold; color:#fff; text-shadow:0 0 8px #ff3b1f;}
+  .lifeblock .hearts{font-size:13px; letter-spacing:1px; color:#ff5a4a;}
+  #turnbox{margin-left:auto; text-align:center;}
+  #turnbox .t{font-size:22px; font-weight:bold; color:#fff;}
+  #turnbox .l{font-size:11px; letter-spacing:2px; color:#ffb27a;}
+  #emberbox{text-align:center;}
+  .pips{font-size:16px; letter-spacing:2px; color:#ff9a3c;}
+  .pips .off{color:#5a3a22;}
+  .resline{font-size:12px; color:#ffd27a;}
+  /* ---------- dragon hand (top centre) ---------- */
+  #dragonhand{position:absolute; top:66px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; z-index:4;}
+  .minicard{width:52px; height:72px; border-radius:6px; border:2px solid #7a4a1a;
+    background:linear-gradient(160deg,#5a1a08,#2a0c02); position:relative;
+    box-shadow:0 3px 8px #000a;}
+  .minicard::after{content:"🐉"; position:absolute; inset:0; display:flex;
+    align-items:center; justify-content:center; font-size:22px;}
+  #dragoncount{position:absolute; top:70px; left:calc(50% + 190px); font-size:13px;
+    color:#ffd27a; background:#0009; padding:3px 8px; border-radius:10px; z-index:4;}
+  /* ---------- arena ---------- */
+  #arena{position:absolute; top:118px; left:300px; width:680px; height:330px; z-index:2;}
+  #dragonwrap{position:absolute; left:50%; top:0; transform:translateX(-50%);
+    width:340px; height:250px; text-align:center;}
+  #dragonwrap svg{width:300px; height:210px; filter:drop-shadow(0 0 22px #ff5a1a88);}
+  #dragonname{font-size:15px; letter-spacing:3px; color:#ffb27a; margin-top:-6px;}
+  #breathbanner{position:absolute; left:50%; top:206px; transform:translateX(-50%);
+    width:640px; text-align:center; font-size:21px; font-weight:bold; letter-spacing:1px;
+    color:#fff; background:linear-gradient(90deg,#8f0e00,#e02400,#8f0e00);
+    border:3px solid #ffd27a; border-radius:10px; padding:8px 10px; z-index:6;
+    box-shadow:0 0 26px #ff2a00; display:none; animation:pulse 0.8s infinite alternate;}
+  #breathbanner.show{display:block;}
+  @keyframes pulse{from{transform:translateX(-50%) scale(1);} to{transform:translateX(-50%) scale(1.03);}}
+  #intent{position:absolute; left:50%; top:252px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:10px; z-index:5;}
+  #intent .lbl{font-size:12px; letter-spacing:2px; color:#ffb27a;}
+  #intentcard{width:64px; height:88px; border-radius:8px; border:2px solid #ffd27a;
+    background:linear-gradient(160deg,#4a1408,#1a0600); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-size:26px; box-shadow:0 4px 12px #000c;}
+  #intentcard .sub{font-size:9px; color:#ffd27a; margin-top:2px; letter-spacing:1px;}
+  #intenttext{font-size:15px; color:#ffe9c0; max-width:330px; line-height:1.3;}
+  /* hoard pile */
+  #hoard{position:absolute; right:6px; top:8px; width:190px; text-align:center; z-index:5;}
+  #hoardpile{position:relative; width:170px; height:96px; margin:0 auto;}
+  .coin{position:absolute; width:34px; height:34px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff2b0, #f5c542 45%, #b8860b 90%);
+    border:2px solid #8a5f00; box-shadow:0 2px 4px #000a; display:flex; align-items:center;
+    justify-content:center; font-size:15px; font-weight:bold; color:#7a5200;}
+  .gem{position:absolute; width:22px; height:22px; transform:rotate(45deg);
+    background:linear-gradient(135deg,#7ef0ff,#1a7fd0); border:2px solid #dff6ff;
+    box-shadow:0 0 10px #4ac8ff;}
+  #hoardcount{font-size:26px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px #ff9a00;}
+  #hoardlabel{font-size:12px; letter-spacing:3px; color:#ffd27a;}
+  #guardshield{position:absolute; left:50%; top:30px; transform:translateX(-50%);
+    font-size:15px; font-weight:bold; color:#bfe0ff; background:#0a2a4acc;
+    border:2px solid #6db3ff; border-radius:8px; padding:4px 10px; display:none; z-index:6;}
+  #guardshield.show{display:block;}
+  /* rage meter */
+  #ragebox{position:absolute; left:6px; top:8px; width:190px; z-index:5;}
+  #ragelabel{font-size:12px; letter-spacing:3px; color:#ff9a6a; text-align:center;}
+  #ragemeter{width:190px; height:22px; border:2px solid #ff8c4a; border-radius:11px;
+    background:#2a0c02; overflow:hidden; margin-top:4px;}
+  #ragefill{height:100%; width:0%; background:linear-gradient(90deg,#ff8c2a,#ff2a00);
+    transition:width .4s;}
+  #ragefill.full{animation:rageblink .5s infinite alternate;}
+  @keyframes rageblink{from{filter:brightness(1);} to{filter:brightness(1.8);}}
+  #ragenum{text-align:center; font-size:16px; font-weight:bold; color:#ff7a3c; margin-top:2px;}
+  #phasebanner{position:absolute; left:50%; top:120px; transform:translateX(-50%);
+    font-size:24px; font-weight:bold; color:#ffe9a0; text-shadow:0 0 16px #ff5a00;
+    display:none; z-index:7; white-space:nowrap;}
+  /* ---------- legend (left panel) ---------- */
+  #legend{position:absolute; left:14px; top:118px; width:268px; z-index:4;
+    background:#00000066; border:2px solid #7a4a1a; border-radius:12px; padding:10px 12px;}
+  #legend h3{font-size:14px; letter-spacing:3px; color:var(--gold); margin-bottom:8px;}
+  .legrow{display:flex; gap:9px; align-items:flex-start; margin-bottom:8px;}
+  .legicon{width:34px; height:34px; flex:none; border-radius:8px; display:flex;
+    align-items:center; justify-content:center; font-size:19px; border:2px solid #0006;}
+  .legrow b{font-size:14px; display:block;}
+  .legrow span{font-size:11.5px; color:#e8cfa0; line-height:1.25; display:block;}
+  /* ---------- log (right panel) ---------- */
+  #logpanel{position:absolute; right:14px; top:118px; width:268px; z-index:4;
+    background:#00000066; border:2px solid #7a4a1a; border-radius:12px; padding:10px 12px;}
+  #logpanel h3{font-size:14px; letter-spacing:3px; color:var(--gold); margin-bottom:6px;}
+  #log{font-size:12.5px; line-height:1.45; color:#ffe9c0; height:250px; overflow:hidden;}
+  #log div{margin-bottom:4px;}
+  #log .good{color:#8affa8;} #log .bad{color:#ff9a8a;} #log .gold{color:#ffd75e;}
+  /* ---------- player hand ---------- */
+  #handzone{position:absolute; left:0; right:0; bottom:56px; height:200px; z-index:4;
+    display:flex; justify-content:center; align-items:flex-end; gap:10px; padding:0 20px;}
+  .card{width:128px; height:186px; border-radius:12px; position:relative; cursor:pointer;
+    border:3px solid #0008; box-shadow:0 6px 14px #000b; transition:transform .15s, box-shadow .15s;
+    background:linear-gradient(170deg,#fff8e0,#f2d9a0 70%,#d9b06a); color:#241203;}
+  .card:hover{transform:translateY(-16px) scale(1.05); box-shadow:0 14px 22px #000c, 0 0 18px #ffd75e66;}
+  .card.selected{transform:translateY(-20px); box-shadow:0 0 0 4px var(--gold), 0 14px 22px #000c;}
+  .card.unaffordable{filter:brightness(.55) saturate(.6);}
+  .card.blocked{filter:grayscale(.8) brightness(.55);}
+  .card.upgraded{box-shadow:0 0 0 3px var(--gold), 0 6px 14px #000b;}
+  .card.upgraded::after{content:"★ UPGRADED"; position:absolute; bottom:-11px; left:50%;
+    transform:translateX(-50%); background:var(--gold); color:#4a2c00; font-size:9px;
+    font-weight:bold; padding:2px 7px; border-radius:8px; white-space:nowrap;}
+  .card .cost{position:absolute; top:6px; left:6px; width:30px; height:30px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #bfe8ff, #2f7fe0 60%, #174a8a);
+    color:#fff; font-size:17px; font-weight:bold; display:flex; align-items:center;
+    justify-content:center; border:2px solid #fff8;}
+  .card .typebadge{position:absolute; top:6px; right:6px; width:34px; height:34px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid #0005;}
+  .card .cname{position:absolute; top:44px; left:0; right:0; text-align:center; font-size:14px;
+    font-weight:bold; letter-spacing:.5px; padding:0 4px;}
+  .card .cval{position:absolute; top:66px; left:0; right:0; text-align:center; font-size:44px;
+    font-weight:bold; line-height:1; text-shadow:0 2px 0 #fff6;}
+  .card .cval small{font-size:15px; display:block; letter-spacing:2px; margin-top:2px;}
+  .card .crule{position:absolute; bottom:8px; left:8px; right:8px; text-align:center;
+    font-size:11.5px; line-height:1.3; color:#4a2c08;}
+  .card .key{position:absolute; bottom:-4px; right:-4px; width:20px; height:20px; border-radius:50%;
+    background:#241203; color:#ffd75e; font-size:11px; display:flex; align-items:center;
+    justify-content:center; font-weight:bold;}
+  .type-strike .typebadge{background:#d92b2b; color:#fff;}
+  .type-pilfer .typebadge{background:#f5c542; color:#5a3a00;}
+  .type-guard .typebadge{background:#2f7fe0; color:#fff;}
+  .type-mend .typebadge{background:#2fae5f; color:#fff;}
+  .type-trick .typebadge{background:#9b4de0; color:#fff;}
+  .card.flying{transition:transform .45s ease-in, opacity .45s; transform:translateY(-260px) scale(.7) rotate(12deg); opacity:0;}
+  /* ---------- controls bar ---------- */
+  #controls{position:absolute; left:0; right:0; bottom:0; height:52px; display:flex;
+    align-items:center; gap:12px; padding:0 16px; z-index:6;
+    background:linear-gradient(0deg,#000000bb,#00000000);}
+  .btn{font-family:inherit; font-size:16px; font-weight:bold; letter-spacing:1px;
+    padding:9px 18px; border-radius:10px; border:2px solid #ffd75e; cursor:pointer;
+    background:linear-gradient(180deg,#8a4a10,#5a2c05); color:#ffe9a0;}
+  .btn:hover{filter:brightness(1.25);}
+  .btn.primary{background:linear-gradient(180deg,#e02400,#8f0e00); color:#fff; font-size:17px;}
+  .btn:disabled{opacity:.45; cursor:default; filter:none;}
+  #goldbox{font-size:17px; color:var(--gold); font-weight:bold;}
+  #deckbox{font-size:13px; color:#e8cfa0;}
+  #hint{font-size:12.5px; color:#cbb27a; margin-left:auto;}
+  /* ---------- callouts ---------- */
+  .callout{position:absolute; z-index:8; font-size:13px; font-weight:bold; color:#fff;
+    background:#000c; border:2px solid var(--gold); border-radius:8px; padding:5px 9px;
+    max-width:210px; line-height:1.3; display:none;}
+  .callout.show{display:block;}
+  .callout::after{content:""; position:absolute; left:50%; bottom:-34px; width:2px; height:34px;
+    background:var(--gold);}
+  /* ---------- overlays ---------- */
+  .overlay{position:absolute; inset:0; z-index:20; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    background:radial-gradient(ellipse 80% 70% at 50% 40%, #5a2205ee, #120801f2);}
+  .overlay h1{font-size:64px; letter-spacing:6px; color:var(--gold);
+    text-shadow:0 0 30px #ff8c2a, 0 4px 0 #000;}
+  .overlay h2{font-size:22px; color:#ffd9a0; margin:10px 0 4px; font-style:italic; font-weight:normal;}
+  .overlay .sub{font-size:15px; color:#e8cfa0; max-width:640px; line-height:1.5; margin:8px 0;}
+  .overlay .howto{font-size:14px; color:#ffe9c0; background:#0008; border:2px solid #7a4a1a;
+    border-radius:12px; padding:12px 18px; margin:12px 0; line-height:1.7; text-align:left;}
+  .overlay .howto b{color:var(--gold);}
+  .bigbtn{font-family:inherit; font-size:24px; font-weight:bold; letter-spacing:2px;
+    padding:14px 34px; border-radius:14px; border:3px solid #ffd75e; cursor:pointer;
+    background:linear-gradient(180deg,#e02400,#8f0e00); color:#fff; margin-top:14px;}
+  .bigbtn:hover{filter:brightness(1.2);}
+  .stats{font-size:17px; color:#ffe9c0; line-height:1.8; margin-top:10px;}
+  .stats b{color:var(--gold);}
+  #winglow{font-size:88px; margin-bottom:6px;}
+  .hidden{display:none !important;}
+  #blockbadge{position:absolute; left:50%; top:470px; transform:translateX(-50%);
+    font-size:14px; font-weight:bold; color:#bfe0ff; background:#0a2a4acc;
+    border:2px solid #6db3ff; border-radius:8px; padding:3px 10px; z-index:5; display:none;}
+  #blockbadge.show{display:block;}
+  .dmgfloat{position:absolute; font-size:34px; font-weight:bold; color:#ff5a3c;
+    text-shadow:0 0 10px #ff2a00, 0 2px 0 #000; z-index:9; pointer-events:none;
+    animation:floatup 1s forwards;}
+  .dmgfloat.heal{color:#7aff9a; text-shadow:0 0 10px #2fae5f, 0 2px 0 #000;}
+  .dmgfloat.gold{color:#ffd75e; text-shadow:0 0 10px #b8860b, 0 2px 0 #000;}
+  @keyframes floatup{from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(-70px);}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div id="title">🐉 DRAGON'S HOARD</div>
+    <div id="objective">Steal the dragon's gold, upgrade your cards — and bring the beast down before its breath burns you.</div>
+    <div class="lifeblock"><div class="who">YOU</div><div class="life" id="plife">30 ❤</div><div class="hearts" id="phearts"></div></div>
+    <div class="lifeblock"><div class="who">DRAGON</div><div class="life" id="dlife">30 ❤</div><div class="hearts" id="dhearts"></div></div>
+    <div id="turnbox"><div class="t" id="turnnum">TURN 1</div><div class="l">EMBER&nbsp;⬢</div></div>
+    <div id="emberbox"><div class="pips" id="emberpips"></div><div class="resline" id="goldline">🪙 Gold: 0</div></div>
+  </div>
+
+  <div id="dragonhand"></div>
+  <div id="dragoncount">Dragon's hand: 6 cards</div>
+
+  <div id="arena">
+    <div id="ragebox">
+      <div id="ragelabel">🔥 DRAGON RAGE</div>
+      <div id="ragemeter"><div id="ragefill"></div></div>
+      <div id="ragenum">0 / 100</div>
+    </div>
+    <div id="hoard">
+      <div id="hoardlabel">👑 THE HOARD</div>
+      <div id="hoardpile"></div>
+      <div id="hoardcount">24 🪙</div>
+      <div id="guardshield">🛡 HOARD GUARD 8</div>
+    </div>
+    <div id="dragonwrap">
+      <svg viewBox="0 0 300 210" aria-label="dragon">
+        <defs>
+          <linearGradient id="dskin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ff7a3c"/><stop offset=".55" stop-color="#d92b12"/>
+            <stop offset="1" stop-color="#7a0e00"/>
+          </linearGradient>
+          <linearGradient id="dbelly" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd75e"/><stop offset="1" stop-color="#e09a1a"/>
+          </linearGradient>
+        </defs>
+        <!-- horns -->
+        <path d="M78 62 L52 8 L104 44 Z" fill="#f5c542" stroke="#8a5f00" stroke-width="3"/>
+        <path d="M222 62 L248 8 L196 44 Z" fill="#f5c542" stroke="#8a5f00" stroke-width="3"/>
+        <path d="M96 44 L84 2 L122 30 Z" fill="#e0a020" stroke="#8a5f00" stroke-width="2"/>
+        <path d="M204 44 L216 2 L178 30 Z" fill="#e0a020" stroke="#8a5f00" stroke-width="2"/>
+        <!-- head -->
+        <path d="M150 30 C110 30 84 58 82 96 C80 128 96 150 108 168 L96 196 C120 206 180 206 204 196 L192 168 C204 150 220 128 218 96 C216 58 190 30 150 30 Z" fill="url(#dskin)" stroke="#5a0a00" stroke-width="3"/>
+        <!-- snout + jaw -->
+        <path d="M104 128 C118 156 182 156 196 128 L188 168 C170 182 130 182 112 168 Z" fill="url(#dbelly)" stroke="#8a5f00" stroke-width="2"/>
+        <ellipse cx="122" cy="128" rx="7" ry="5" fill="#5a0a00"/>
+        <ellipse cx="178" cy="128" rx="7" ry="5" fill="#5a0a00"/>
+        <!-- eyes -->
+        <path d="M104 84 L136 78 L132 96 L108 98 Z" fill="#ffe95e"/>
+        <path d="M196 84 L164 78 L168 96 L192 98 Z" fill="#ffe95e"/>
+        <circle cx="120" cy="88" r="5" fill="#1a0500"/>
+        <circle cx="180" cy="88" r="5" fill="#1a0500"/>
+        <!-- teeth -->
+        <path d="M118 152 l6 10 6 -10 Z M138 156 l6 10 6 -10 Z M158 156 l6 10 6 -10 Z" fill="#fff"/>
+        <!-- brow ridges -->
+        <path d="M100 74 L140 66 L136 76 L104 82 Z" fill="#8f1400"/>
+        <path d="M200 74 L160 66 L164 76 L196 82 Z" fill="#8f1400"/>
+        <!-- gold wreath coins -->
+        <g fill="#f5c542" stroke="#8a5f00" stroke-width="2">
+          <circle cx="60" cy="120" r="11"/><circle cx="52" cy="152" r="9"/><circle cx="70" cy="180" r="10"/>
+          <circle cx="240" cy="120" r="11"/><circle cx="248" cy="152" r="9"/><circle cx="230" cy="180" r="10"/>
+          <circle cx="150" cy="204" r="10"/>
+        </g>
+        <g fill="#ffd75e" font-size="11" font-weight="bold" text-anchor="middle">
+          <text x="60" y="124">G</text><text x="240" y="124">G</text><text x="150" y="208">G</text>
+        </g>
+      </svg>
+      <div id="dragonname">— VERMATHRAX, HOARD-KEEPER —</div>
+    </div>
+    <div id="phasebanner"></div>
+    <div id="breathbanner">🔥 DRAGON BREATH INCOMING — GUARD NOW! 🔥</div>
+    <div id="intent">
+      <div id="intentcard">🐉<div class="sub">NEXT MOVE</div></div>
+      <div><div class="lbl">THE DRAGON WILL…</div><div id="intenttext">…bare its teeth.</div></div>
+    </div>
+  </div>
+  <div id="blockbadge">🛡 BLOCK 0</div>
+
+  <div id="legend">
+    <h3>📖 CARD LEGEND</h3>
+    <div class="legrow"><div class="legicon" style="background:#d92b2b">⚔️</div><div><b>STRIKE — red sword</b><span>Deal damage. Big Strikes break the Hoard Guard.</span></div></div>
+    <div class="legrow"><div class="legicon" style="background:#f5c542">🪙</div><div><b>PILFER — gold coin</b><span>Steal gold from the Hoard. Stealing feeds RAGE.</span></div></div>
+    <div class="legrow"><div class="legicon" style="background:#2f7fe0">🛡️</div><div><b>GUARD — blue shield</b><span>Block the dragon's next hit — vital vs Breath.</span></div></div>
+    <div class="legrow"><div class="legicon" style="background:#2fae5f">🍃</div><div><b>MEND — green leaf</b><span>Heal yourself. Survive the long fight.</span></div></div>
+    <div class="legrow"><div class="legicon" style="background:#9b4de0">⭐</div><div><b>TRICK — purple star</b><span>Soothe rage, feint, or kindle extra Ember.</span></div></div>
+    <div class="legrow"><div class="legicon" style="background:#5a2c05">⬢</div><div><b>EMBER — blue gem cost</b><span>Each card costs Ember. You gain +1 every turn.</span></div></div>
+  </div>
+
+  <div id="logpanel"><h3>📜 BATTLE LOG</h3><div id="log"></div></div>
+
+  <div id="handzone"></div>
+
+  <div id="controls">
+    <button class="btn" id="btnupgrade">⬆ UPGRADE CARD (2 🪙)</button>
+    <button class="btn primary" id="btnend">END TURN ⏎</button>
+    <button class="btn" id="btnrestart">↻ RESTART (R)</button>
+    <button class="btn" id="btnmute">🔊 SOUND (M)</button>
+    <span id="deckbox"></span>
+    <span id="hint">Click a card to play it • 1–7 keys play cards • U upgrade • Space end turn</span>
+  </div>
+
+  <div class="callout" id="co-hoard" style="left:872px; top:150px;">👑 THE HOARD — steal its gold to upgrade cards!</div>
+  <div class="callout" id="co-rage" style="left:330px; top:150px;">🔥 RAGE fills as you steal — full rage = Dragon Breath!</div>
+  <div class="callout" id="co-breath" style="left:430px; top:300px;">⚠️ BREATH telegraphed — Guard now or take 12!</div>
+  <div class="callout" id="co-pilfer" style="left:560px; top:520px;">🪙 PILFER mid-flight — snatching a gem from the pile!</div>
+
+  <div class="overlay" id="titlescreen">
+    <h1>🐉 DRAGON'S HOARD</h1>
+    <h2>A hoard-stealing card duel against Vermathrax, the Hoard-Keeper</h2>
+    <div class="sub">The dragon sleeps on a mountain of gold. <b>Strike</b> it down — or <b>Pilfer</b> its hoard,
+    spend the gold to <b>upgrade</b> your cards, and survive its <b>Rage</b>. At 20 Life it enrages. At 10 Life
+    it guards its hoard — break the guard with a big Strike before you can steal again.</div>
+    <div class="howto">
+      ⚔️ <b>STRIKE</b> (red sword) — damage the dragon &nbsp;•&nbsp; 🪙 <b>PILFER</b> (gold coin) — steal gold, feeds Rage<br>
+      🛡️ <b>GUARD</b> (blue shield) — block the next hit &nbsp;•&nbsp; 🍃 <b>MEND</b> (green leaf) — heal<br>
+      ⭐ <b>TRICK</b> (purple star) — soothe rage, feint, kindle Ember &nbsp;•&nbsp; ⬢ <b>EMBER</b> — pay to play a card<br>
+      🏆 First to reduce the rival to <b>0 Life</b> wins. Both start at <b>30 Life</b>.
+    </div>
+    <button class="bigbtn" id="btnstart">▶ CLICK TO BEGIN</button>
+    <div class="sub" style="font-size:13px">Click a card to play it • keys 1–7 play cards • U upgrades a card for 2 gold • Space ends turn • R restarts • M mutes</div>
+  </div>
+
+  <div class="overlay hidden" id="winscreen">
+    <div id="winglow">🏆</div>
+    <h1 style="color:#8affa8">VICTORY!</h1>
+    <h2>The hoard is yours — Vermathrax bows and the gold is yours to keep.</h2>
+    <div class="stats" id="winstats"></div>
+    <button class="bigbtn" id="btnagain">▶ PLAY AGAIN (R)</button>
+  </div>
+
+  <div class="overlay hidden" id="lossscreen">
+    <div id="winglow">💀</div>
+    <h1 style="color:#ff6a5a">DEFEAT</h1>
+    <h2>The dragon's breath claims another hero. The hoard keeps its gold… for now.</h2>
+    <div class="stats" id="lossstats"></div>
+    <button class="bigbtn" id="btnretry">▶ TRY AGAIN (R)</button>
+  </div>
+</div>
+<script src="src/audio.js"></script>
+<script src="src/cards.js"></script>
+<script src="src/state.js"></script>
+<script src="src/ai.js"></script>
+<script src="src/render.js"></script>
+<script src="src/input.js"></script>
+<script src="src/shots.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>
