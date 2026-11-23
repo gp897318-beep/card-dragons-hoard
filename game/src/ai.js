@@ -18,9 +18,9 @@ function pickDragonIntent(s, first) {
     return { kind: 'hoard', text: 'Gather 4 more gold into its Hoard.' };
   }
   if (roll < 0.12 && !first) {
-    return { kind: 'attack', bonus: 2, text: 'Swipe HARD at you for ' + ((s.enraged ? 6 : 4) + 2) + ' damage!' };
+    return { kind: 'attack', bonus: 2, text: 'Swipe HARD at you for ' + ((s.enraged ? 5 : 3) + 2) + ' damage!' };
   }
-  var atk = s.enraged ? 6 : 4;
+  var atk = s.enraged ? 5 : 3;
   return { kind: 'attack', text: 'Swipe at you for ' + atk + ' damage.' };
 }
 
@@ -44,24 +44,28 @@ function autoplayStep(s, style) {
   }
   /* Play cards in priority order until nothing affordable remains. */
   var played = true;
-  var guard = 0;
   while (played) {
     played = false;
     var order = reckless
       ? ['pilfer', 'strike', 'trick', 'mend', 'guard']
-      : ['guard', 'pilfer', 'strike', 'mend', 'trick'];
-    /* Guard only when a breath or a big hit is coming. */
-    var needGuard = s.breathArmed || (s.intent && s.intent.kind === 'attack' && s.playerLife <= 10);
+      : (s.gold < 4
+        ? ['pilfer', 'strike', 'guard', 'mend', 'trick']   /* poor: steal first to fund upgrades */
+        : ['strike', 'pilfer', 'guard', 'mend', 'trick']);
     for (var p = 0; p < order.length; p++) {
       var type = order[p];
       for (var j = 0; j < s.hand.length; j++) {
         var card = s.hand[j];
         if (card.type !== type) continue;
-        if (type === 'guard' && !needGuard && guard > 0) continue;
-        if (type === 'mend' && s.playerLife >= MAX_LIFE - 2) continue;
-        if (type === 'trick' && card.effect === 'soothe' && s.rage < 40) continue;
+        /* Greedy sense: strike first; pilfer only while poor; guard
+           proactively when a hit is coming; mend when hurt; soothe
+           when rage is high. */
+        if (!reckless) {
+          if (type === 'pilfer' && s.gold >= 6) continue;
+          if (type === 'guard' && s.block >= 6 && !s.breathArmed) continue;
+          if (type === 'mend' && s.playerLife >= 25) continue;
+          if (type === 'trick' && card.effect === 'soothe' && s.rage < 55) continue;
+        }
         if (canPlay(s, card)) {
-          if (type === 'guard') guard++;
           playCard(s, j);
           played = true;
           if (s.over) return false;

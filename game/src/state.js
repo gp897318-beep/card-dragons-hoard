@@ -5,11 +5,11 @@
 var MAX_LIFE = 30;
 var HOARD_START = 24;
 var RAGE_MAX = 100;
-var BREATH_DAMAGE = 12;
+var BREATH_DAMAGE = 10;
 var ENRAGE_LIFE = 20;
 var GUARD_LIFE = 10;
-var GUARD_HP = 8;
-var EMBER_START = 3;
+var GUARD_HP = 6;
+var EMBER_START = 4;
 var EMBER_MAX = 10;
 var DRAW_PER_TURN = 2;
 var HAND_LIMIT = 7;
@@ -146,9 +146,11 @@ function stealGold(s, amount, source) {
   s.hoard -= taken;
   s.gold += taken;
   s.stats.goldStolen += taken;
+  /* Stolen gold kindles your fire: +1 Ember per theft. */
+  s.ember = Math.min(EMBER_MAX, s.ember + 1);
   addLog(s, source + ' steals ' + taken + ' gold from the Hoard!', 'gold');
   floatDamage('hoard', taken, 'gold');
-  addRage(s, rageGain(s, taken * 5 + 8));
+  addRage(s, rageGain(s, taken * 4 + 6));
   playSound('coin');
   return taken;
 }
@@ -235,7 +237,7 @@ function resolveDragonTurn(s) {
     s.breathArmed = false;
     playSound('breath');
   } else if (intent.kind === 'attack') {
-    var atk = (s.enraged ? 6 : 4) + (intent.bonus || 0);
+    var atk = (s.enraged ? 5 : 3) + (intent.bonus || 0);
     var hit = Math.max(0, atk - s.block);
     s.block = Math.max(0, s.block - atk);
     s.playerLife = Math.max(0, s.playerLife - hit);

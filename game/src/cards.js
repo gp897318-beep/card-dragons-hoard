@@ -16,14 +16,14 @@ var TYPE_INFO = {
    trick cards carry an `effect` key; `value` is their display number. */
 var CARD_DEFS = [
   // Strikes — red sword (8)
-  { name: 'Slash',      type: 'strike', cost: 1, value: 4, rule: 'Deal 4 damage.' },
-  { name: 'Slash',      type: 'strike', cost: 1, value: 4, rule: 'Deal 4 damage.' },
-  { name: 'Cleave',     type: 'strike', cost: 1, value: 5, rule: 'Deal 5 damage.' },
-  { name: 'Cleave',     type: 'strike', cost: 1, value: 5, rule: 'Deal 5 damage.' },
-  { name: 'Heavy Blow', type: 'strike', cost: 2, value: 6, rule: 'Deal 6 damage.' },
-  { name: 'Heavy Blow', type: 'strike', cost: 2, value: 6, rule: 'Deal 6 damage.' },
-  { name: 'Dragonbite', type: 'strike', cost: 2, value: 7, rule: 'Deal 7 damage.' },
-  { name: 'Dragonslayer',type: 'strike', cost: 2, value: 8, rule: 'Deal 8 damage. Breaks Hoard Guard.' },
+  { name: 'Slash',      type: 'strike', cost: 1, value: 5, rule: 'Deal 5 damage.' },
+  { name: 'Slash',      type: 'strike', cost: 1, value: 5, rule: 'Deal 5 damage.' },
+  { name: 'Cleave',     type: 'strike', cost: 1, value: 6, rule: 'Deal 6 damage.' },
+  { name: 'Cleave',     type: 'strike', cost: 1, value: 6, rule: 'Deal 6 damage.' },
+  { name: 'Heavy Blow', type: 'strike', cost: 1, value: 7, rule: 'Deal 7 damage.' },
+  { name: 'Heavy Blow', type: 'strike', cost: 1, value: 7, rule: 'Deal 7 damage.' },
+  { name: 'Dragonbite', type: 'strike', cost: 2, value: 8, rule: 'Deal 8 damage.' },
+  { name: 'Dragonslayer',type: 'strike', cost: 2, value: 9, rule: 'Deal 9 damage. Breaks Hoard Guard.' },
   // Pilfers — gold coin (6)
   { name: 'Quick Fingers', type: 'pilfer', cost: 1, value: 2, rule: 'Steal 2 gold from the Hoard.' },
   { name: 'Quick Fingers', type: 'pilfer', cost: 1, value: 2, rule: 'Steal 2 gold from the Hoard.' },

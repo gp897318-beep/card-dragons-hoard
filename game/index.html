@@ -18,15 +18,15 @@
     overflow:hidden;}
   /* ---------- top bar ---------- */
   #topbar{position:absolute; top:0; left:0; right:0; height:64px; display:flex;
-    align-items:center; gap:14px; padding:0 16px;
+    align-items:center; gap:10px; padding:0 12px; overflow:hidden;
     background:linear-gradient(180deg,#00000088,#00000000); z-index:5;}
-  #title{font-size:30px; font-weight:bold; letter-spacing:2px; color:var(--gold);
-    text-shadow:0 0 14px #ff8c2a, 0 2px 0 #000;}
-  #objective{font-size:13px; color:#ffd9a0; font-style:italic; max-width:300px; line-height:1.25;}
+  #title{font-size:24px; font-weight:bold; letter-spacing:1px; color:var(--gold);
+    text-shadow:0 0 14px #ff8c2a, 0 2px 0 #000; white-space:nowrap;}
+  #objective{font-size:12px; color:#ffd9a0; font-style:italic; max-width:200px; line-height:1.25;}
   .lifeblock{display:flex; flex-direction:column; align-items:center; gap:1px;}
   .lifeblock .who{font-size:11px; letter-spacing:2px; color:#ffb27a;}
   .lifeblock .life{font-size:24px; font-weight:bold; color:#fff; text-shadow:0 0 8px #ff3b1f;}
-  .lifeblock .hearts{font-size:13px; letter-spacing:1px; color:#ff5a4a;}
+  .lifeblock .hearts{font-size:9px; letter-spacing:0; color:#ff5a4a; white-space:nowrap;}
   #turnbox{margin-left:auto; text-align:center;}
   #turnbox .t{font-size:22px; font-weight:bold; color:#fff;}
   #turnbox .l{font-size:11px; letter-spacing:2px; color:#ffb27a;}
@@ -48,7 +48,7 @@
   #arena{position:absolute; top:118px; left:300px; width:680px; height:330px; z-index:2;}
   #dragonwrap{position:absolute; left:50%; top:0; transform:translateX(-50%);
     width:340px; height:250px; text-align:center;}
-  #dragonwrap svg{width:300px; height:210px; filter:drop-shadow(0 0 22px #ff5a1a88);}
+  #dragonwrap svg{width:260px; height:182px; filter:drop-shadow(0 0 22px #ff5a1a88);}
   #dragonname{font-size:15px; letter-spacing:3px; color:#ffb27a; margin-top:-6px;}
   #breathbanner{position:absolute; left:50%; top:206px; transform:translateX(-50%);
     width:640px; text-align:center; font-size:21px; font-weight:bold; letter-spacing:1px;
@@ -245,11 +245,11 @@
         <path d="M104 128 C118 156 182 156 196 128 L188 168 C170 182 130 182 112 168 Z" fill="url(#dbelly)" stroke="#8a5f00" stroke-width="2"/>
         <ellipse cx="122" cy="128" rx="7" ry="5" fill="#5a0a00"/>
         <ellipse cx="178" cy="128" rx="7" ry="5" fill="#5a0a00"/>
-        <!-- eyes -->
-        <path d="M104 84 L136 78 L132 96 L108 98 Z" fill="#ffe95e"/>
-        <path d="M196 84 L164 78 L168 96 L192 98 Z" fill="#ffe95e"/>
-        <circle cx="120" cy="88" r="5" fill="#1a0500"/>
-        <circle cx="180" cy="88" r="5" fill="#1a0500"/>
+        <!-- eyes: slanted, angry -->
+        <path d="M102 92 L138 74 L136 92 L106 100 Z" fill="#ffe95e"/>
+        <path d="M198 92 L162 74 L164 92 L194 100 Z" fill="#ffe95e"/>
+        <ellipse cx="120" cy="86" rx="3.5" ry="6" fill="#1a0500"/>
+        <ellipse cx="180" cy="86" rx="3.5" ry="6" fill="#1a0500"/>
         <!-- teeth -->
         <path d="M118 152 l6 10 6 -10 Z M138 156 l6 10 6 -10 Z M158 156 l6 10 6 -10 Z" fill="#fff"/>
         <!-- brow ridges -->
@@ -299,10 +299,10 @@
     <span id="hint">Click a card to play it • 1–7 keys play cards • U upgrade • Space end turn</span>
   </div>
 
-  <div class="callout" id="co-hoard" style="left:872px; top:150px;">👑 THE HOARD — steal its gold to upgrade cards!</div>
-  <div class="callout" id="co-rage" style="left:330px; top:150px;">🔥 RAGE fills as you steal — full rage = Dragon Breath!</div>
-  <div class="callout" id="co-breath" style="left:430px; top:300px;">⚠️ BREATH telegraphed — Guard now or take 12!</div>
-  <div class="callout" id="co-pilfer" style="left:560px; top:520px;">🪙 PILFER mid-flight — snatching a gem from the pile!</div>
+  <div class="callout" id="co-hoard" style="left:958px; top:56px;">👑 THE HOARD — steal its gold to upgrade cards!</div>
+  <div class="callout" id="co-rage" style="left:306px; top:70px;">🔥 RAGE fills as you steal — full rage = Dragon Breath!</div>
+  <div class="callout" id="co-breath" style="left:300px; top:248px;">⚠️ BREATH telegraphed — Guard now or take 10!</div>
+  <div class="callout" id="co-pilfer" style="left:170px; top:478px;">🪙 PILFER mid-flight — snatching a gem from the pile!</div>
 
   <div class="overlay" id="titlescreen">
     <h1>🐉 DRAGON'S HOARD</h1>

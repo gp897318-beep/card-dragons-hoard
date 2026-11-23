@@ -37,15 +37,16 @@ function coverScene(s) {
   s.discard = buildDeck().slice(12, 16);
   handFromNames(s, ['Gem Grab', 'Dragonslayer', 'Tower Shield', 'Cunning Feint', 'Soothe', 'Spring Water']);
   s.hand[0].upgraded = true; s.hand[0].value = 5; /* upgraded Pilfer, mid-flight */
+  s.hand[0].rule = 'Steal 5 gold from the Hoard.';
   s.selected = 0;
-  s.intent = { kind: 'attack', text: 'Swipe at you for 6 damage.' };
+  s.intent = { kind: 'attack', text: 'Swipe at you for 5 damage.' };
   s.log = [
     { msg: 'Gem Grab steals 4 gold from the Hoard!', kind: 'gold' },
     { msg: 'RAGE climbs — the dragon is furious!', kind: 'bad' },
     { msg: 'The dragon ENRAGES! Its rage fills twice as fast!', kind: 'bad' },
     { msg: 'Hoard Guard is up! Pilfer is blocked — break it with a big Strike!', kind: 'bad' },
     { msg: 'Tower Shield: you raise 6 Block.', kind: 'good' },
-    { msg: 'The dragon will: Swipe at you for 6 damage.', kind: 'bad' }
+    { msg: 'The dragon will: Swipe at you for 5 damage.', kind: 'bad' }
   ];
   s.stats = { damageDealt: 19, cardsPlayed: 14, goldStolen: 11, turns: 7 };
   renderAll(s);
@@ -60,7 +61,7 @@ function coverScene(s) {
   }
   /* Arm the breath telegraph for the banner, without firing it. */
   s.breathArmed = true;
-  s.intent = { kind: 'breath', text: 'Unleash DRAGON BREATH for 12 damage!' };
+  s.intent = { kind: 'breath', text: 'Unleash DRAGON BREATH for 10 damage!' };
   renderAll(s);
   showCallouts(true);
   window.__shotReady = true;
@@ -82,12 +83,12 @@ function winScene(s) {
   s.ember = 4;
   s.rage = 40;
   handFromNames(s, ['Dragonslayer', 'Coin Snatch', 'Aegis Wall', 'Phoenix Draught']);
-  s.intent = { kind: 'attack', text: 'Swipe at you for 6 damage.' };
+  s.intent = { kind: 'attack', text: 'Swipe at you for 5 damage.' };
   s.log = [
     { msg: 'Dragonslayer hits the dragon for 8!', kind: 'good' },
-    { msg: 'Hoard Guard absorbs 4 damage (0 guard left).', kind: 'gold' },
-    { msg: 'HOARD GUARD SHATTERED! Pilfer is open again!', kind: 'good' }
+    { msg: 'The dragon falls! The hoard is yours!', kind: 'good' }
   ];
+  s.stats.turns = s.turn;
   renderAll(s);
   /* Land the killing blow through the real rules. */
   s.dragonLife = 3;
@@ -111,12 +112,13 @@ function lossScene(s) {
   s.breathArmed = true;
   s.enraged = true;
   handFromNames(s, ['Slash', 'Quick Fingers', 'Buckler', 'Herb Poultice']);
-  s.intent = { kind: 'breath', text: 'Unleash DRAGON BREATH for 12 damage!' };
+  s.intent = { kind: 'breath', text: 'Unleash DRAGON BREATH for 10 damage!' };
   s.log = [
     { msg: 'RAGE FULL! Dragon Breath is coming next turn — GUARD NOW!', kind: 'bad' },
     { msg: 'You have no Guard in hand…', kind: 'bad' },
-    { msg: 'The dragon will: Unleash DRAGON BREATH for 12 damage!', kind: 'bad' }
+    { msg: 'The dragon will: Unleash DRAGON BREATH for 10 damage!', kind: 'bad' }
   ];
+  s.stats.turns = s.turn;
   renderAll(s);
   /* Take the breath through the real rules. */
   s.block = 0;
